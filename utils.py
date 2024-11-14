@@ -6,6 +6,21 @@ from scipy.signal import butter, lfilter
 import random
 import numpy as np
 from spafe.features.lpc import lpc
+
+def get_audio_duration(file_path):
+    """
+    Calculate the duration of an audio file.
+
+    :param file_path: Path to the audio file (.wav)
+    :return: Duration of the audio file (seconds)
+    """
+    try:
+        duration = librosa.get_duration(filename=file_path)
+        return duration
+    except Exception as e:
+        print(f"Error calculating duration for {file_path}: {e}")
+        return np.nan
+
 def remove_silence(y, sr, top_db=20):
     # Loại bỏ khoảng lặng ở đầu và cuối tín hiệu
     y_trimmed, _ = librosa.effects.trim(y, top_db=top_db)
@@ -344,7 +359,10 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
     df_features = pd.DataFrame(features_list)
 
     # Ghi DataFrame vào CSV
-    df_features.to_csv(output_csv, mode='a', header=False, index=False)
+    if resume:
+        df_features.to_csv(output_csv, mode='a', header=False, index=False)
+    else:
+        df_features.to_csv(output_csv, mode='w', header=True, index=False)
 
     print(f"Saved features to: {output_csv}")
 
