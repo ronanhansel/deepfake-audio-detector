@@ -114,7 +114,7 @@ class AudioAugmentation:
         return augmented_audio
 
 def process_audio_files(file_paths, labels, output_csv='features.csv', sample_size=None,
-                        n_mfcc=13, resume=True, force_new=True, augment_data=False, snapshot_interval=50):
+                        n_mfcc=13, resume=True, force_new=True, augment_data=False, snapshot_interval=50, augment_split=0.5):
     """
     Feature extraction from files and save to a CSV file.
 
@@ -131,7 +131,7 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
     """
     if augment_data:
         print("Data augmentation is set to True.")
-        output_csv = output_csv.replace('.csv', '_augmented.csv')
+        output_csv = output_csv.replace('.csv', f'_augmented_{str(augment_split).replace('.', '_')}.csv')
     # Check if the number of files is sufficient to select sample_size
     if sample_size is not None and len(file_paths) < sample_size:
         raise ValueError(f"Number of files is less than {sample_size}. Please check the file_paths list.")
@@ -187,13 +187,13 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
 
             if augment_data:
                 # Add noise
-                if np.random.rand() < 0.5:
+                if np.random.rand() < augment_split:
                     y = AudioAugmentation.add_noise(y, noise_factor=0.02)
                 # Time stretch
-                if np.random.rand() < 0.5:
+                if np.random.rand() < augment_split:
                     y = AudioAugmentation.time_stretch(y, rate=1.1)
                 # Pitch shift
-                if np.random.rand() < 0.5:
+                if np.random.rand() < augment_split:
                     y = AudioAugmentation.pitch_shift(y, sr, n_steps=2)
 
             # Tiền xử lý âm thanh
