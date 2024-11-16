@@ -188,8 +188,8 @@ def extract_features(y, sr, n_mfcc=13, n_chroma=3, n_spectral_contrast=5, lpc_or
 
     return features
 
-def process_audio_files(file_paths, labels, output_csv='features.csv', sample_size=100,
-                        n_mfcc=13, n_chroma=3, n_spectral_contrast=5, lpc_order=12, resume=True):
+def process_audio_files(file_paths, labels, output_csv='features.csv', sample_size=None,
+                        n_mfcc=13, n_chroma=3, n_spectral_contrast=5, lpc_order=12, resume=True, force_new=True):
     """
     Feature extraction from files and save to a CSV file.
 
@@ -213,6 +213,13 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
 
     # Ghép cặp file_paths và labels
     file_label_pairs = list(zip(file_paths, labels))
+    if force_new:
+        if not os.path.exists(output_csv):
+            raise ValueError(f"File {output_csv} does not exist. Please set force_new=False to resume processing.")
+        df_output = pd.read_csv(output_csv)
+        # Remove already processed files from file_label_pairs
+        file_label_pairs = [(fp, lbl) for fp, lbl in file_label_pairs if fp not in df_output['file_path'].values]
+        print(f"Resuming processing. {len(df_output)} files have been processed before. Leaving {len(file_label_pairs)} files to process.")
 
     # Chọn ngẫu nhiên sample_size cặp mà không lặp lại
     if sample_size is not None:
