@@ -131,7 +131,7 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
     """
     if augment_data:
         print("Data augmentation is set to True.")
-        output_csv = output_csv.replace('.csv', f'_augmented_{str(augment_split).replace('.', '_')}.csv')
+        output_csv = output_csv.replace('.csv', f'_augmented_{str(augment_split).replace(".", "_")}.csv')
     # Check if the number of files is sufficient to select sample_size
     if sample_size is not None and len(file_paths) < sample_size:
         raise ValueError(f"Number of files is less than {sample_size}. Please check the file_paths list.")
