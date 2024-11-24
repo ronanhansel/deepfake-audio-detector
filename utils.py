@@ -49,6 +49,72 @@ class AudioFeatureExtractor:
         return features
     
 class AudioPreprocessor:
+    def remove_silence(y, sr, top_db=20):
+        # Loại bỏ khoảng lặng ở đầu và cuối tín hiệu
+        y_trimmed, _ = librosa.effects.trim(y, top_db=top_db)
+        return y_trimmed
+
+    def bandpass_filter(y, sr, lowcut, highcut, order=3):
+        nyq = 0.5 * sr  # Tần số Nyquist
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        y_filtered = lfilter(b, a, y)
+        return y_filtered
+
+    def normalize_volume(y, desired_rms=0.1):
+        # Tính RMS hiện tại của tín hiệu
+        current_rms = np.sqrt(np.mean(y**2))
+        # Tính tỷ lệ để điều chỉnh
+        scalar = desired_rms / (current_rms + 1e-6)  # Thêm epsilon để tránh chia cho 0
+        # Điều chỉnh tín hiệu
+        y_normalized = y * scalar
+        return y_normalized
+
+    def decrease_low_db(y, sr, threshold_db=-40, target_db=-80):
+        """
+        Minimise volumn below a threshold. This is useful to prevent environmental noise being considered by the model
+
+        :param y: raw audio input (numpy array)
+        :param sr: Sample rate (Hz)
+        :param threshold_db: (e.g: -40 dB)
+        :param target_db: the db to which all pieces below threshold will decrease (e.g: -80 dB)
+        :return: (numpy array)
+        """
+        abs_y = np.abs(y)
+
+        # Find the maximum ampltitude
+        ref_amplitude = np.max(abs_y) if np.max(abs_y) > 0 else 1.0
+
+        # calculate relative db
+        y_db = 20 * np.log10(abs_y / ref_amplitude + 1e-10)
+
+        mask = y_db < threshold_db
+
+        desired_amplitude = 10 ** (target_db / 20) * ref_amplitude  # E.g: -80 dB
+        y_adjusted = y.copy()
+
+        y_adjusted[mask] = y_adjusted[mask] / (abs_y[mask] + 1e-10) * desired_amplitude
+
+        return y_adjusted
+    def extract_mel_spectrogram(y, sr, n_mels=128, fmax=8000):
+        """
+        Extract Mel Spectrogram features from an audio signal.
+
+        :param y: Audio signal (numpy array, mono)
+        :param sr: Sampling rate (Hz)
+        :param n_mels: Number of Mel bands to generate
+        :param fmax: Maximum frequency (Hz)
+        :return: Mel Spectrogram (numpy array)
+        """
+        try:
+            mel_spectrogram = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, fmax=fmax)
+            mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
+            mel_spectrogram_mean = np.mean(mel_spectrogram_db, axis=1)
+        except Exception as e:
+            raise ValueError(f"Error extracting Mel Spectrogram: {e}")
+
+        return mel_spectrogram_mean
 
     def remove_silence(y, sr, top_db=20):
         # Loại bỏ khoảng lặng ở đầu và cuối tín hiệu
