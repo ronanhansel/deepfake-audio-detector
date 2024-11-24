@@ -166,12 +166,12 @@ class AudioPreprocessor:
         return y_adjusted
 
 class AudioAugmentation:
-    def add_noise(audio, noise_factor=0.02):
+    def add_noise(audio, noise_factor=0.005):
         noise = np.random.randn(len(audio))
         augmented_audio = audio + noise_factor * noise
         return augmented_audio
     
-    def time_stretch(audio, rate=1.1):
+    def time_stretch(audio, rate=0.8):
         augmented_audio = librosa.effects.time_stretch(audio, rate=rate)
         return augmented_audio
     
@@ -245,7 +245,7 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
         if resume:
             # Check if the file has been processed before
             if df_output['file_path'].str.contains(file_path).any():
-                print(f"File has been processed before: {file_path}")
+                # print(f"File has been processed before: {file_path}")
                 continue
         try:
             # Đọc tệp âm thanh dưới dạng mono và chuẩn hóa
