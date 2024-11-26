@@ -180,7 +180,7 @@ class AudioAugmentation:
         return augmented_audio
 
 def process_audio_files(file_paths, labels, output_csv='features.csv', sample_size=None,
-                        n_mfcc=30, resume=True, force_new=True, augment_data=False, snapshot_interval=50, augment_split=0.5):
+                        n_mfcc=30, resume=True, force_new=True, augment_data=False, snapshot_interval=5000, augment_split=0.5):
     """
     Feature extraction from files and save to a CSV file.
 

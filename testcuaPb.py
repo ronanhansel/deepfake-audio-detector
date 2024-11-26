@@ -12,7 +12,7 @@ import utils
 #lấy path của audio files
 import os
 
-def get_audio_paths(folder_path, max_files=500, extensions=(".wav", ".mp3",".flac")):
+def get_audio_paths(folder_path, max_files=10000, extensions=(".wav", ".mp3",".flac")):
     """
     Lấy đường dẫn của các file audio trong thư mục.
     
@@ -39,7 +39,9 @@ if __name__ == "__main__":
     spoof = []
     #folder_real = "E:/777/126732"  # Thay bằng đường dẫn thực tế
     folder_real = "voice_dataset\\LibriSeVoc\\gt"
+    # folder_synthesized = "voice_dataset\\LibriSeVoc\\wavernn"
     folder_synthesized = "voice_dataset\\LibriSeVoc\\diffwave"
+
     audio_paths_1 = get_audio_paths(folder_real)
     audio_paths_0 = get_audio_paths(folder_synthesized)
 
@@ -147,7 +149,7 @@ def evaluate_model(model, audio_paths, labels):
 
     # 1. Create sequences (same as training)
     sequence_length = 10
-    overlap = 5
+    overlap = 3
     sequences, indices = create_sequences(features, sequence_length, overlap)
     labels = labels[indices]
 
@@ -171,7 +173,7 @@ def evaluate_model(model, audio_paths, labels):
 
     # 4. Evaluate
     y_pred = model.predict(padded_sequences)
-    y_pred_binary = (y_pred > 0.5).astype(int)
+    y_pred_binary = (y_pred > 0.5).astype(int).flatten()
     
     # Print metrics
     loss, accuracy = model.evaluate(padded_sequences, labels)
