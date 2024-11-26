@@ -164,3 +164,4 @@ cython_debug/
 content
 .DS_Store
 voice_dataset/
+output/data
