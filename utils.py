@@ -180,7 +180,7 @@ class AudioAugmentation:
         return augmented_audio
 
 def process_audio_files(file_paths, labels, output_csv='features.csv', sample_size=None,
-                        n_mfcc=30, resume=True, force_new=True, augment_data=False, snapshot_interval=5000, augment_split=0.5):
+                        n_mfcc=30, resume=True, force_new=True, augment_data=False, snapshot_interval=5000, augment_split=0.5, ignore_labels=False):
     """
     Feature extraction from files and save to a CSV file.
 
@@ -203,11 +203,14 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
         raise ValueError(f"Number of files is less than {sample_size}. Please check the file_paths list.")
 
     # Check the length of file_paths and labels
-    if len(file_paths) != len(labels):
+    if not ignore_labels and len(file_paths) != len(labels):
         raise ValueError("The number of file paths and labels must be the same.")
-
-    # Ghép cặp file_paths và labels
+    elif ignore_labels:
+        print("Ignoring labels.")
+        labels = [None] * len(file_paths)
+    # Pair file_paths and labels if doesn't ignore labels
     file_label_pairs = list(zip(file_paths, labels))
+    print(file_label_pairs)
     if force_new:
         if not os.path.exists(output_csv):
             raise ValueError(f"File {output_csv} does not exist. Please set force_new=False to resume processing.")
@@ -307,7 +310,6 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
         except Exception as e:
             print(f"Lỗi khi xử lý {file_path}: {e}")
             continue
-    print(features_list)
     # Tạo DataFrame từ danh sách đặc trưng
     df_features = pd.DataFrame(features_list)
 
@@ -318,8 +320,6 @@ def process_audio_files(file_paths, labels, output_csv='features.csv', sample_si
         df_features.to_csv(output_csv, mode='w', header=True, index=False)
 
     print(f"Saved features to: {output_csv}")
-    print(df_features.shape)
-    print(1)
     return df_features
 
 
@@ -339,6 +339,10 @@ def create_sequences(features, sequence_length, overlap):
     """
     sequences = []
     indices = []  # Store the starting index of each sequence
+    if len(features) <= sequence_length:
+        # Pad if necessary
+        padded_features = np.pad(features, ((0, sequence_length - len(features)), (0, 0)), 'constant')
+        return np.array([padded_features]), [0]
     for i in range(0, len(features) - sequence_length + 1, sequence_length - overlap):
         sequences.append(features[i: i + sequence_length])
         indices.append(i)  # Store the starting index
