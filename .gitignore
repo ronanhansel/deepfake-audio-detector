@@ -165,4 +165,5 @@ content
 .DS_Store
 voice_dataset/
 output/data
+*.npz
 *.csv
