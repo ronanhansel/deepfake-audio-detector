@@ -167,3 +167,4 @@ voice_dataset/
 output/data
 *.npz
 *.csv
+*.pt
