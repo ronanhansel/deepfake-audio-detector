@@ -1,5 +1,1 @@
-# TODO
-
-- Add noise to the audio samples
-- Pitch shifting
-- KL Divergence
+# CNN - LSTM Hybrid Approach for Deepfake audio detection

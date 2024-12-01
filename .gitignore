@@ -168,3 +168,4 @@ output/data
 *.npz
 *.csv
 *.pt
+*.keras
