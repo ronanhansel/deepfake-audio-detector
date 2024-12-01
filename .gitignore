@@ -169,3 +169,5 @@ output/data
 *.csv
 *.pt
 *.keras
+*.npy
+*.poetrylock
