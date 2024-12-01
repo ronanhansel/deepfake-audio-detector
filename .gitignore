@@ -164,7 +164,7 @@ cython_debug/
 content
 .DS_Store
 voice_dataset/
-output/data
+output/
 *.npz
 *.csv
 *.pt
